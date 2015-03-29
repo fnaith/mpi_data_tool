@@ -1,0 +1,51 @@
+clang++ -std=c++0x -O3 -W -c dcprocessing/dcprocessing/Integer.cpp -o obj/Integer.o
+
+clang++ -std=c++0x -O3 -W -c dcprocessing/dcprocessing/Number.cpp -o obj/Number.o
+
+clang++ -std=c++0x -O3 -W -c dcprocessing/dcprocessing/in_range.cpp -o obj/in_range.o
+
+clang++ -std=c++0x -O3 -W -c dcprocessing/dcprocessing/file_read_error.cpp -o obj/file_read_error.o
+
+clang++ -std=c++0x -O3 -W -c dcprocessing/dcprocessing/file_write_error.cpp -o obj/file_write_error.o
+
+clang++ -std=c++0x -O3 -W -c dcprocessing/dcprocessing/count_line.cpp -o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/send_file.cpp -o exe/send_file obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/origin_to_libsvm.cpp -o exe/origin_to_libsvm obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/libsvm_separate_target.cpp -o exe/libsvm_separate_target obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/extract_instance_number.cpp -o exe/extract_instance_number obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/extract_dimension.cpp -o exe/extract_dimension obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/extract_target_info.cpp -o exe/extract_target_info obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/extract_label_info.cpp -o exe/extract_label_info obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/split_by_row.cpp -o exe/split_by_row obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/count_feature.cpp -o exe/count_feature obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/split_row_sparse_to_element.cpp -o exe/split_row_sparse_to_element obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/merge_element_to_colume_sparse.cpp -o exe/merge_element_to_colume_sparse obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/clean_element.cpp -o exe/clean_element obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/min_max_feature.cpp -o exe/min_max_feature obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/mean_feature.cpp -o exe/mean_feature obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/squared_sum_feature.cpp -o exe/squared_sum_feature obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/std_feature.cpp -o exe/std_feature obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/cor_feature.cpp -o exe/cor_feature obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/sax_feature.cpp -o exe/sax_feature obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+clang++ -std=c++0x -O3 -W -lmpi -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization dcprocessing/mRMR_feature.cpp -o exe/mRMR_feature obj/Integer.o obj/Number.o obj/in_range.o obj/file_read_error.o obj/file_write_error.o obj/count_line.o
+
+export DYLD_LIBRARY_PATH="/usr/local/Cellar/gcc/4.9.2_1/lib/gcc/4.9"
