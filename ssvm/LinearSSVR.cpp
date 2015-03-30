@@ -168,19 +168,19 @@ const Vector& LinearSSVR::W() const {
   return W_;
 }
 
-const Number LinearSSVR::C() const {
+Number LinearSSVR::C() const {
   return C_;
 }
 
-const Number LinearSSVR::ins() const {
+Number LinearSSVR::ins() const {
   return ins_;
 }
 
-const Integer LinearSSVR::iter() const {
+Integer LinearSSVR::iter() const {
   return iter_;
 }
 
-const Number LinearSSVR::time() const {
+Number LinearSSVR::time() const {
   return time_;
 }
 

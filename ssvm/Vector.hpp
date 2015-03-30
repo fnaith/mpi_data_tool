@@ -24,14 +24,14 @@ void save_vector(Archive& ar,
       ++data;
     }
   } catch (const std::exception& e) {
-    string message;
+    std::string message;
     try {
       message.assign("save_vector :\n");
       message += e.what();
-    } catch (const exception&) {
-      throw runtime_error("save_vector\n");
+    } catch (const std::exception&) {
+      throw std::runtime_error("save_vector\n");
     }
-    throw runtime_error(message);
+    throw std::runtime_error(message);
   }
 }
 
@@ -48,14 +48,14 @@ void load_vector(Archive& ar,
       ++data;
     }
   } catch (const std::exception& e) {
-    string message;
+    std::string message;
     try {
       message.assign("load_vector :\n");
       message += e.what();
-    } catch (const exception&) {
-      throw runtime_error("load_vector\n");
+    } catch (const std::exception&) {
+      throw std::runtime_error("load_vector\n");
     }
-    throw runtime_error(message);
+    throw std::runtime_error(message);
   }
 }
 

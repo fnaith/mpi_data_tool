@@ -66,7 +66,7 @@ RBFRSVC::RBFRSVC(const SparseMatrix& positive_data,
     SSVC::make_constraint(negative_number, &kernel_data);
     W_.resize(kernel_data.cols());
     W_.setConstant(0.0);
-    SSVC::train(kernel_data, negative_number, C_, &W_, &iter_);
+    SSVC::train(kernel_data, C_, &W_, &iter_);
     time_ = (Number)(clock() - start) / CLOCKS_PER_SEC;
   } catch (const exception& e) {
     throw runtime_error(string("RBFRSVC"
@@ -249,23 +249,23 @@ const Vector& RBFRSVC::W() const {
   return W_;
 }
 
-const Number RBFRSVC::R() const {
+Number RBFRSVC::R() const {
   return R_;
 }
 
-const Number RBFRSVC::G() const {
+Number RBFRSVC::G() const {
   return G_;
 }
 
-const Number RBFRSVC::C() const {
+Number RBFRSVC::C() const {
   return C_;
 }
 
-const Integer RBFRSVC::iter() const {
+Integer RBFRSVC::iter() const {
   return iter_;
 }
 
-const Number RBFRSVC::time() const {
+Number RBFRSVC::time() const {
   return time_;
 }
 

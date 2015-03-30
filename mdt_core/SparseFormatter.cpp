@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <fstream>
+#include <stdexcept>
 
 using namespace std;
 

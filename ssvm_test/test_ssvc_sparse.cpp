@@ -8,7 +8,7 @@
 using namespace ssvm;
 using namespace std;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *[]) {
   try {
     if (argc != 1) {
       throw runtime_error("dont input");
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     Vector w0(tra_data.cols());
     w0.setConstant(0.0);
     Integer counter;
-    SSVC::train(tra_data, neg_size, C, &w0, &counter);
+    SSVC::train(tra_data, C, &w0, &counter);
     cout << w0.transpose() << '/' << counter << endl << endl;
 
     Vector y(tra_data.rows());

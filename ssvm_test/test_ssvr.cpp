@@ -8,7 +8,7 @@
 using namespace ssvm;
 using namespace std;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *[]) {
   try {
     if (argc != 1) {
       throw runtime_error("dont input");

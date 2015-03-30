@@ -35,13 +35,13 @@ class LinearSSVR {
   void dump(const string& model_file) const;
 
   const Vector& W() const;
-  const Number C() const;
-  const Number ins() const;
-  const Integer iter() const;
-  const Number time() const;
+  Number C() const;
+  Number ins() const;
+  Integer iter() const;
+  Number time() const;
  private:
   template<class Archive>
-  void save(Archive& ar, const unsigned Integer) const {
+  void save(Archive& ar, const unsigned) const {
     save_vector(ar, W_);
     ar & C_;
     ar & ins_;
@@ -50,7 +50,7 @@ class LinearSSVR {
   }
 
   template<class Archive>
-  void load(Archive& ar, const unsigned Integer) {
+  void load(Archive& ar, const unsigned) {
     load_vector(ar, W_);
     ar & C_;
     ar & ins_;
