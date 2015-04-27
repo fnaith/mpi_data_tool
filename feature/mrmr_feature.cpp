@@ -1,4 +1,3 @@
-#include "../mdt_core/count_line.hpp"
 #include "../mdt_core/in_range.hpp"
 #include "../mdt_core/file_open.hpp"
 #include "../mdt_core/SparseFormatter.hpp"
@@ -31,39 +30,40 @@ typedef unordered_map<Integer, Number> ValueProb;
 typedef unordered_map<Integer, ValueProb> PairProb;
 
 void compute_joint_prob(const vector<Integer>& vec1,
-                        const vector<Integer>& vec2,
+                        const Integer *vec2,
                         Integer instance_number,
                         PairProb *pair_prob,
                         ValueProb *vec1_prob,
                         ValueProb *vec2_prob) {
-  for (vector<Integer>::const_iterator vit1(vec1.begin()), vit2(vec2.begin());
+  const Integer *vit2(vec2);
+  for (vector<Integer>::const_iterator vit1(vec1.begin());
        vit1 != vec1.end(); ++vit1, ++vit2) {
+    Integer v1(*vit1), v2(*vit2);
     {
-      PairProb::iterator mit1(pair_prob->find(*vit1));
+      PairProb::iterator mit1(pair_prob->find(v1));
       if (mit1 == pair_prob->end()) {
-        (*pair_prob)[*vit1] = ValueProb();
-        mit1 = pair_prob->find(*vit1);
+        (*pair_prob)[v1] = ValueProb();
+        mit1 = pair_prob->find(v1);
       }
-      
-      ValueProb::iterator mit2(mit1->second.find(*vit2));
+      ValueProb::iterator mit2(mit1->second.find(v2));
       if (mit2 == mit1->second.end()) {
-        mit1->second[*vit2] = 1.0;
+        mit1->second[v2] = 1.0;
       } else {
         ++(mit2->second);
       }
     }
     {
-      ValueProb::iterator mit1(vec1_prob->find(*vit1));
+      ValueProb::iterator mit1(vec1_prob->find(v1));
       if (mit1 == vec1_prob->end()) {
-        (*vec1_prob)[*vit1] = 1.0;
+        (*vec1_prob)[v1] = 1.0;
       } else {
         ++(mit1->second);
       }
     }
     {
-      ValueProb::iterator mit2(vec2_prob->find(*vit2));
+      ValueProb::iterator mit2(vec2_prob->find(v2));
       if (mit2 == vec2_prob->end()) {
-        (*vec2_prob)[*vit2] = 1.0;
+        (*vec2_prob)[v2] = 1.0;
       } else {
         ++(mit2->second);
       }
@@ -99,34 +99,42 @@ Number compute_mutual_info(const PairProb& pair_prob,
 
 int main(int argc, char *argv[]) {
   try {
-    if (argc != 7) {
+    if (argc != 8) {
       throw runtime_error("<file root path> <feature name> "
                           "<output folder name> <split number> "
-                          "<target name> <select number>\n");
+                          "<target name> <select number> "
+                          "<in memory(1 as true)>\n");
     }
     const filesystem::path root_path(argv[1]);
     const string feature_name(argv[2]);
     const string feature_file((root_path / feature_name).string());
     const string dimension_file(feature_file + ".dimension");
-
-    ifstream input;
-    file_open(dimension_file.c_str(), ifstream::in | ifstream::binary, &input);
     Integer dimension;
-    boost::archive::text_iarchive(input) >> dimension;
-    input.close();
-
+    {
+      ifstream input;
+      file_open(dimension_file.c_str(), ifstream::in | ifstream::binary, &input);
+      boost::archive::text_iarchive(input) >> dimension;
+      input.close();
+    }
     const filesystem::path output_folder(root_path / argv[3]);
-    filesystem::create_directories(output_folder);
     const string split_number_str(argv[4]);
     const Integer split_number(in_range(integer_from_str(split_number_str.c_str()),
                                         1, numeric_limits<Integer>::max()));
     const filesystem::path split_path(output_folder / split_number_str);
     const string target_name(argv[5]);
     const string target_file((root_path / target_name).string());
-    const string instance_number_file((root_path / target_name).string() + ".instance_number");
+    const string instance_number_file(target_file + ".instance_number");
+    Integer instance_number;
+    {
+      ifstream input;
+      file_open(instance_number_file.c_str(), ifstream::in | ifstream::binary, &input);
+      boost::archive::text_iarchive(input) >> instance_number;
+      input.close();
+    }
     const string select_number_str(argv[6]);
     const Integer select_number(in_range(integer_from_str(select_number_str.c_str()),
                                          1, dimension));
+    const bool in_memory(string(argv[7]) == "1");
 
     mpi::environment env(argc, argv);
     mpi::communicator world;
@@ -140,8 +148,111 @@ int main(int argc, char *argv[]) {
 
     if (world.rank() == worker_number) {
       clock_t start(clock());
+      vector<Integer> vec(instance_number);
+      vector<Number> IXX(dimension, 0.0);
+      vector<Number> IXC(dimension);
+      vector<Integer> best_feature_idx(select_number);
+      best_feature_idx.clear();
+      {
+        ifstream input;
+        file_open(target_file.c_str(), ifstream::in | ifstream::binary, &input);
+        string line;
+        for (Integer i(0); i < instance_number; ++i) {
+          getline(input, line);
+          vec[i] = static_cast<Integer>(strtod(line.data(), NULL));
+        }
+        input.close();
+      }
+      bool mrmr_done(false);
+      if (in_memory) {
+        bool memory_fail(false);
+        vector<Integer *> data(dimension);
+        for (size_t i(0); i < data.size(); ++i) {
+          data[i] = (Integer *)malloc(instance_number * sizeof(Integer));
+          if (data[i] == NULL) {
+            for (size_t j(0); j < i; ++j) {
+              free(data[j]);
+            }
+            memory_fail = true;
+            throw runtime_error("memory_fail");
+          }
+        }
 
-      try {
+        if (!memory_fail) {
+          {
+            Integer column_counter(0);
+            for (Integer i(0); i < split_number; ++i) {
+              ostringstream split_id;
+              split_id << i;
+              filesystem::path split_folder(split_path / split_id.str());
+              string feature_file((split_folder / feature_name).string());
+              ifstream input;
+              string line;
+              file_open(feature_file.c_str(), ifstream::in | ifstream::binary, &input);
+              while (getline(input, line)) {
+                Integer *column(data[column_counter]);
+                fill(column, column + instance_number, 0);
+                SparseFormatter formatter(line);
+                Integer col;
+                Number value;
+                while (formatter.next(&col, &value)) {
+                  column[col - 1] = static_cast<Integer>(value);
+                }
+                ++column_counter;
+              }
+              input.close();
+            }
+          }
+          cout << "overhead : "
+               << (double)(clock() - start) / CLOCKS_PER_SEC << endl;
+
+          for (Integer s(0); s < select_number; ++s) {
+            clock_t start(clock());
+
+            for (Integer i(0); i < dimension; ++i) {
+              PairProb pair_prob;
+              ValueProb vec1_prob, vec2_prob;
+              Integer *vec2(data[i]);
+              compute_joint_prob(vec, vec2, instance_number, &pair_prob, &vec1_prob, &vec2_prob);
+              Number tmp_IXX(compute_mutual_info(pair_prob, vec1_prob, vec2_prob));
+              if (s == 0) {
+                IXC[i] = tmp_IXX;
+              } else {
+                IXX[i] += tmp_IXX;
+              }
+            }
+
+            size_t size(best_feature_idx.size() + 1);
+            Number max_value(IXC[0] - IXX[0] / size);
+            Integer max_idx(0);
+            for (Integer i(1); i < dimension; ++i) {
+              Number value(IXC[i] - IXX[i] / size);
+              if (value > max_value) {
+                max_value = value;
+                max_idx = i;
+              }
+            }
+            best_feature_idx.push_back(max_idx);
+            IXX[max_idx] = numeric_limits<Number>::max();
+
+            cout << (double)(clock() - start) / CLOCKS_PER_SEC << ' '
+                 << max_idx << ' '
+                 << max_value << endl;
+          }
+          for (size_t i(0); i < data.size(); ++i) {
+            free(data[i]);
+          }
+          mrmr_done = true;
+        }
+      } else {
+        cout << "overhead : "
+             << (double)(clock() - start) / CLOCKS_PER_SEC << endl;
+      }
+      for (Integer i(0); i < worker_number; ++i) {
+        mpi::request mrmr_done_req(world.isend(i, 0, mrmr_done));
+        mrmr_done_req.wait();
+      }
+      if (!mrmr_done) {
         vector<Integer> begins(split_number);
         for (Integer i(0); i < split_number; ++i) {
           ostringstream split_id;
@@ -151,38 +262,20 @@ int main(int argc, char *argv[]) {
 
           ifstream input;
           file_open(feature_range_file.c_str(), ifstream::in | ifstream::binary, &input);
-
           boost::archive::text_iarchive(input) >> begins[i];
           --begins[i];
           input.close();
         }
 
-        ifstream input;
-        file_open(instance_number_file.c_str(), ifstream::in | ifstream::binary, &input);
-        Integer instance_number;
-        boost::archive::text_iarchive(input) >> instance_number;
-        input.close();
-
-        vector<Number> IXX(dimension, 0.0);
-        vector<Number> IXC(dimension);
-        vector<Integer> vec(instance_number);
-
         for (Integer i(0); i < worker_number; ++i) {
-          mpi::request instance_number_req(world.isend(i, 0, instance_number));
+          mpi::request instance_number_req(world.isend(i, 1, instance_number));
           instance_number_req.wait();
         }
         string line;
-        vector<Integer> best_feature_idx(select_number);
-        best_feature_idx.clear();
         for (Integer s(0); s < select_number; ++s) {
-          if (s == 0) {
-            file_open(target_file.c_str(), ifstream::in | ifstream::binary, &input);
-            for (Integer i(0); i < instance_number; ++i) {
-              getline(input, line);
-              vec[i] = static_cast<Integer>(strtol(line.data(), NULL, 10));
-            }
-            input.close();
-          } else {
+          clock_t start(clock());
+
+          if (s != 0) {
             for (Integer i(split_number - 1); i >= 0; --i) {
               if (best_feature_idx.back() >= begins[i]) {
                 ostringstream split_id;
@@ -201,7 +294,7 @@ int main(int argc, char *argv[]) {
                 Integer col;
                 Number value;
                 while (formatter.next(&col, &value)) {
-                  vec[col - 1] = value;
+                  vec[col - 1] = static_cast<Integer>(value);
                 }
                 input.close();
                 break;
@@ -210,7 +303,7 @@ int main(int argc, char *argv[]) {
           }
 
           for (Integer i(0); i < worker_number; ++i) {
-            mpi::request vec_req(world.isend(i, 1, vec));
+            mpi::request vec_req(world.isend(i, 2, vec));
             vec_req.wait();
           }
 
@@ -238,10 +331,10 @@ int main(int argc, char *argv[]) {
               }
               if (worker2task[i] == -1) {
                 worker2task[i] = task_id;
-                mpi::request task_id_req(world.isend(i, 2, worker2task[i]));
+                mpi::request task_id_req(world.isend(i, 3, worker2task[i]));
                 task_id_req.wait();
                 if (task_id < split_number) {
-                  subcounter_reqs[i] = world.irecv(i, 3, tmp_IXX);
+                  subcounter_reqs[i] = world.irecv(i, 4, tmp_IXX);
                   ++task_id;
                 }
               }
@@ -260,36 +353,32 @@ int main(int argc, char *argv[]) {
               max_idx = i;
             }
           }
-          // cout << max_value << ' ';
           best_feature_idx.push_back(max_idx);
           IXX[max_idx] = numeric_limits<Number>::max();
+        
+          cout << (double)(clock() - start) / CLOCKS_PER_SEC << ' '
+               << max_idx << ' '
+               << max_value << endl;
         }
-        for (vector<Integer>::const_iterator it(best_feature_idx.begin());
-             it != best_feature_idx.end(); ++it) {
-          cout << (*it) << ' ';
-        }
-      } catch (const exception& e) {
-        cout << '<' << world.rank() << '>' << e.what() << endl;
-        throw;
       }
-
-      cout << (double)(clock() - start) / CLOCKS_PER_SEC;
     } else {
-      try {
+      bool mrmr_done;
+      mpi::request mrmr_done_req(world.irecv(worker_number, 0, mrmr_done));
+      mrmr_done_req.wait();
+      if (!mrmr_done) {
         Integer instance_number;
-        mpi::request instance_number_req(world.irecv(worker_number, 0, instance_number));
+        mpi::request instance_number_req(world.irecv(worker_number, 1, instance_number));
         instance_number_req.wait();
-        
+
         vector<Integer> vec1, vec2;
-        
         string line;
         for (Integer s(0); s < select_number; ++s) {
-          mpi::request vec_req(world.irecv(worker_number, 1, vec1));
+          mpi::request vec_req(world.irecv(worker_number, 2, vec1));
           vec_req.wait();
           vec2.resize(vec1.size());
           while (true) {
             Integer task_id(-1);
-            mpi::request task_id_req(world.irecv(worker_number, 2, task_id));
+            mpi::request task_id_req(world.irecv(worker_number, 3, task_id));
             task_id_req.wait();
             if (task_id == split_number) {
               break;
@@ -305,7 +394,7 @@ int main(int argc, char *argv[]) {
             Integer begin, end;
             boost::archive::text_iarchive(input) >> begin >> end;
             input.close();
-            
+
             file_open(feature_file.c_str(), ifstream::in | ifstream::binary, &input);
             vector<Number> tmp_IXX(end - begin);
             for (size_t i(0); i < tmp_IXX.size(); ++i) {
@@ -315,26 +404,25 @@ int main(int argc, char *argv[]) {
               Integer col;
               Number value;
               while (formatter.next(&col, &value)) {
-                vec2[col - 1] = value;
+                vec2[col - 1] = static_cast<Integer>(value);
               }
               PairProb pair_prob;
               ValueProb vec1_prob, vec2_prob;
-              compute_joint_prob(vec1, vec2, instance_number, &pair_prob, &vec1_prob, &vec2_prob);
+              compute_joint_prob(vec1, vec2.data(), instance_number,
+                                 &pair_prob, &vec1_prob, &vec2_prob);
               tmp_IXX[i] = compute_mutual_info(pair_prob, vec1_prob, vec2_prob);
             }
-            mpi::request subcounter_req(world.isend(worker_number, 3, tmp_IXX));
+            mpi::request subcounter_req(world.isend(worker_number, 4, tmp_IXX));
             subcounter_req.wait();
             input.close();
           }
         }
-      } catch (const exception& e) {
-        cout << '<' << world.rank() << '>' << e.what() << endl;
-        throw;
       }
     }
     return EXIT_SUCCESS;
   } catch (const exception& e) {
-    cout << "mRMR_feature : \n" << e.what() << endl;
+    cout << "mrmr_feature : \n"
+         << e.what() << endl;
     return EXIT_FAILURE;
   }
 }

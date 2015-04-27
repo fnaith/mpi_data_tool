@@ -32,6 +32,7 @@ void SSVC::make_constraint(const Integer negative_number,
 }
 
 void SSVC::train(const SparseMatrix& A,
+                 const Integer negative_number,
                  const Number C,
                  Vector *w0,
                  Integer *counter) {
@@ -144,12 +145,13 @@ void SSVC::make_constraint(const Integer negative_number,
 }
 
 void SSVC::train(const Matrix& A,
+                 const Integer negative_number,
                  const Number C,
                  Vector *w0,
                  Integer *counter) {
   try {
     Matrix support_vector;
-    train_with_memory(A, C, w0, counter, &support_vector);
+    train_with_memory(A, negative_number, C, w0, counter, &support_vector);
   } catch (const exception& e) {
     string message;
     try {
@@ -165,6 +167,7 @@ void SSVC::train(const Matrix& A,
 }
 
 void SSVC::train_with_memory(const Matrix& A,
+                             const Integer negative_number,
                              const Number C,
                              Vector *w0,
                              Integer *counter,

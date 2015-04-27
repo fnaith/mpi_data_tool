@@ -1,6 +1,5 @@
 #include "../mdt_core/count_line.hpp"
 #include "../mdt_core/in_range.hpp"
-#include "../mdt_core/file_open.hpp"
 
 #include "../ssvm/LinearSSVC.hpp"
 #include "../ssvm/RBFRSVC.hpp"
@@ -165,8 +164,7 @@ int main(int argc, char *argv[]) {
           total_negative_number += negative_number;
           total_negative_error += negative_error;
         }
-        ofstream ofs;
-        file_open(output, ofstream::out | ofstream::binary | ofstream::app, &ofs);
+        ofstream ofs(output, ofstream::out | ofstream::binary | ofstream::app);
         ofs << "model : " << model << endl;
         ofs << "positive_error : " << total_positive_error << endl;
         ofs << "positive_number : " << total_positive_number << endl;

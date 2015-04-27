@@ -155,8 +155,7 @@ int main(int argc, char *argv[]) {
           total_instance_number += y.rows();
           total_squared_error += (y - result).squaredNorm();
         }
-        ofstream ofs;
-        file_open(output, ofstream::out | ofstream::binary | ofstream::app, &ofs);
+        ofstream ofs(output, ofstream::out | ofstream::binary | ofstream::app);
         ofs << "model : " << model << endl;
         ofs << "total_instance_number : " << total_instance_number << endl;
         ofs << "root mean squared error : " << sqrt(total_squared_error / total_instance_number) << endl;

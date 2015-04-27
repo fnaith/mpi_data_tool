@@ -28,14 +28,14 @@ void save_sparse_matrix(Archive& ar,
       }
     }
   } catch (const std::exception& e) {
-    std::string message;
+    string message;
     try {
       message.assign("save_sparse_matrix :\n");
       message += e.what();
-    } catch (const std::exception&) {
-      throw std::runtime_error("save_sparse_matrix\n");
+    } catch (const exception&) {
+      throw runtime_error("save_sparse_matrix\n");
     }
-    throw std::runtime_error(message);
+    throw runtime_error(message);
   }
 }
 
@@ -58,14 +58,14 @@ void load_sparse_matrix(Archive& ar,
     }
     matrix.setFromTriplets(triplets.begin(), triplets.end());
   } catch (const std::exception& e) {
-    std::string message;
+    string message;
     try {
       message.assign("load_sparse_matrix :\n");
       message += e.what();
-    } catch (const std::exception&) {
-      throw std::runtime_error("load_sparse_matrix\n");
+    } catch (const exception&) {
+      throw runtime_error("load_sparse_matrix\n");
     }
-    throw std::runtime_error(message);
+    throw runtime_error(message);
   }
 }
 

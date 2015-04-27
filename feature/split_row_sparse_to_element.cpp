@@ -1,3 +1,4 @@
+#include "../mdt_core/allocator.hpp"
 #include "../mdt_core/in_range.hpp"
 #include "../mdt_core/file_open.hpp"
 
@@ -28,6 +29,8 @@ struct Element {
   Integer r;
   Integer c;
 };
+
+typedef deque<Element, mdt_core::allocator<Element>> Elements;
 
 int main(int argc, char *argv[]) {
   try {
@@ -90,7 +93,7 @@ int main(int argc, char *argv[]) {
 
     file_open(feature_file.c_str(), ifstream::in | ifstream::binary, &input);
 
-    vector<deque<Element>> elements(split_number);
+    vector<Elements> elementses(split_number);
     string line;
     Element tmp_element;
     tmp_element.r = 0;
@@ -105,7 +108,7 @@ int main(int argc, char *argv[]) {
         tmp_element.c = index;
         try {
           tmp_element.v.assign(head, tail - head);
-          elements[feature_count[tmp_element.c - 1]].push_back(tmp_element);
+          elementses[feature_count[tmp_element.c - 1]].push_back(tmp_element);
         } catch (const exception&) {
           for (Integer i(0); i < split_number; ++i) {
             ostringstream id;
@@ -116,15 +119,15 @@ int main(int argc, char *argv[]) {
             ofstream output;
             file_open(output_file.c_str(), ofstream::out | ofstream::binary | ofstream::app, &output);
 
-            deque<Element>& element(elements[i]);
-            for (deque<Element>::const_iterator it(element.begin()); it != element.end(); ++it) {
+            Elements& element(elementses[i]);
+            for (Elements::const_iterator it(element.begin()); it != element.end(); ++it) {
               output << it->r << '\t' << it->c << '\t' << it->v << "\t\n";
             }
-            elements[i] = deque<Element>();
+            elementses[i] = Elements();
             output.close();
           }
           tmp_element.v.assign(head, tail - head);
-          elements[feature_count[tmp_element.c - 1]].push_back(tmp_element);
+          elementses[feature_count[tmp_element.c - 1]].push_back(tmp_element);
         }
         head = tail + 1;
       }
@@ -159,11 +162,11 @@ int main(int argc, char *argv[]) {
       output.close();
 
       file_open(output_file.c_str(), ofstream::out | ofstream::binary | ofstream::app, &output);
-      deque<Element>& element(elements[i]);
-      for (deque<Element>::const_iterator it(element.begin()); it != element.end(); ++it) {
+      Elements& element(elementses[i]);
+      for (Elements::const_iterator it(element.begin()); it != element.end(); ++it) {
         output << it->r << '\t' << it->c << '\t' << it->v << "\t\n";
       }
-      elements[i] = deque<Element>();
+      elementses[i] = Elements();
       output.close();
     }
 

@@ -1,3 +1,4 @@
+#include "../mdt_core/allocator.hpp"
 #include "../mdt_core/count_line.hpp"
 #include "../mdt_core/in_range.hpp"
 #include "../mdt_core/file_open.hpp"
@@ -25,6 +26,8 @@ struct Pair {
   string v;
   Integer r;
 };
+
+typedef deque<Pair, mdt_core::allocator<Pair>> Pairs;
 
 int main(int argc, char *argv[]) {
   try {
@@ -64,7 +67,7 @@ int main(int argc, char *argv[]) {
       input.close();
 
       Integer output_error(0);
-      vector<deque<Pair>> pairs(end - begin);
+      vector<Pairs> pairses(end - begin);
 
       file_open(input_file.c_str(), ifstream::in | ifstream::binary, &input);
 
@@ -80,7 +83,7 @@ int main(int argc, char *argv[]) {
           tmp_pair.r = r;
           tmp_pair.v = string(head, tail - head);
           try {
-            pairs[c - begin].push_back(tmp_pair);
+            pairses[c - begin].push_back(tmp_pair);
           } catch (const exception&) {
             ostringstream error_id;
             error_id << output_error;
@@ -88,17 +91,17 @@ int main(int argc, char *argv[]) {
             ofstream output;
             file_open((output_file + error_id.str()).c_str(), ofstream::out | ofstream::binary, &output);
 
-            for (size_t j(0); j < pairs.size(); ++j) {
-              deque<Pair>& pair(pairs[j]);
-              for (deque<Pair>::const_iterator it(pair.begin()); it != pair.end(); ++it) {
+            for (size_t j(0); j < pairses.size(); ++j) {
+              Pairs& pair(pairses[j]);
+              for (Pairs::const_iterator it(pair.begin()); it != pair.end(); ++it) {
                 output << it->r << ':' << it->v << ' ';
               }
-              pairs[j] = deque<Pair>();
+              pairses[j] = Pairs();
               output.put('\n');
             }
             output.close();
             ++output_error;
-            pairs[c - begin].push_back(tmp_pair);
+            pairses[c - begin].push_back(tmp_pair);
           }
           head = tail + 1;
         }
@@ -110,12 +113,12 @@ int main(int argc, char *argv[]) {
         ofstream output;
         file_open((output_file + error_id.str()).c_str(), ofstream::out | ofstream::binary, &output);
 
-        for (size_t j(0); j < pairs.size(); ++j) {
-          deque<Pair>& pair(pairs[j]);
-          for (deque<Pair>::const_iterator it(pair.begin()); it != pair.end(); ++it) {
+        for (size_t j(0); j < pairses.size(); ++j) {
+          Pairs& pair(pairses[j]);
+          for (Pairs::const_iterator it(pair.begin()); it != pair.end(); ++it) {
             output << it->r << ':' << it->v << ' ';
           }
-          pairs[j] = deque<Pair>();
+          pairses[j] = Pairs();
           output.put('\n');
         }
         output.close();
@@ -131,7 +134,7 @@ int main(int argc, char *argv[]) {
           inputs[j] = new ifstream;
           file_open((output_file + error_id.str()).c_str(), ifstream::in | ifstream::binary, inputs[j]);
         }
-        for (size_t j(0); j < pairs.size(); ++j) {
+        for (size_t j(0); j < pairses.size(); ++j) {
           for (Integer k(0); k < output_error; ++k) {
             getline(*(inputs[k]), line);
             output << line;
@@ -151,12 +154,12 @@ int main(int argc, char *argv[]) {
         ofstream output;
         file_open(output_file.c_str(), ofstream::out | ofstream::binary, &output);
 
-        for (size_t j(0); j < pairs.size(); ++j) {
-          deque<Pair>& pair(pairs[j]);
-          for (deque<Pair>::const_iterator it(pair.begin()); it != pair.end(); ++it) {
+        for (size_t j(0); j < pairses.size(); ++j) {
+          Pairs& pair(pairses[j]);
+          for (Pairs::const_iterator it(pair.begin()); it != pair.end(); ++it) {
             output << it->r << ':' << it->v << ' ';
           }
-          pairs[j] = deque<Pair>();
+          pairses[j] = Pairs();
           output.put('\n');
         }
         output.close();

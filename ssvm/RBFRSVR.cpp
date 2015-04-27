@@ -171,27 +171,27 @@ const Vector& RBFRSVR::W() const {
   return W_;
 }
 
-Number RBFRSVR::R() const {
+const Number RBFRSVR::R() const {
   return R_;
 }
 
-Number RBFRSVR::G() const {
+const Number RBFRSVR::G() const {
   return G_;
 }
 
-Number RBFRSVR::C() const {
+const Number RBFRSVR::C() const {
   return C_;
 }
 
-Number RBFRSVR::ins() const {
+const Number RBFRSVR::ins() const {
   return ins_;
 }
 
-Integer RBFRSVR::iter() const {
+const Integer RBFRSVR::iter() const {
   return iter_;
 }
 
-Number RBFRSVR::time() const {
+const Number RBFRSVR::time() const {
   return time_;
 }
 

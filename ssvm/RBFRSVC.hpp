@@ -37,14 +37,14 @@ class RBFRSVC {
   const SparseMatrix& reduce_positive() const;
   const SparseMatrix& reduce_negative() const;
   const Vector& W() const;
-  Number R() const;
-  Number G() const;
-  Number C() const;
-  Integer iter() const;
-  Number time() const;
+  const Number R() const;
+  const Number G() const;
+  const Number C() const;
+  const Integer iter() const;
+  const Number time() const;
  protected:
   template<class Archive>
-  void save(Archive& ar, const unsigned) const {
+  void save(Archive& ar, const unsigned Integer) const {
     save_sparse_matrix(ar, reduce_positive_);
     save_sparse_matrix(ar, reduce_negative_);
     save_vector(ar, W_);
@@ -56,7 +56,7 @@ class RBFRSVC {
   }
 
   template<class Archive>
-  void load(Archive& ar, const unsigned) {
+  void load(Archive& ar, const unsigned Integer) {
     load_sparse_matrix(ar, reduce_positive_);
     load_sparse_matrix(ar, reduce_negative_);
     load_vector(ar, W_);

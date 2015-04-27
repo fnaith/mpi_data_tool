@@ -36,12 +36,12 @@ class LinearSSVC {
   void dump(const string& model_file) const;
 
   const Vector& W() const;
-  Number C() const;
-  Integer iter() const;
-  Number time() const;
+  const Number C() const;
+  const Integer iter() const;
+  const Number time() const;
  private:
   template<class Archive>
-  void save(Archive& ar, const unsigned) const {
+  void save(Archive& ar, const unsigned Integer) const {
     save_vector(ar, W_);
     ar & C_;
     ar & iter_;
@@ -49,7 +49,7 @@ class LinearSSVC {
   }
 
   template<class Archive>
-  void load(Archive& ar, const unsigned) {
+  void load(Archive& ar, const unsigned Integer) {
     load_vector(ar, W_);
     ar & C_;
     ar & iter_;

@@ -48,7 +48,8 @@
 "C:\Program Files (x86)\MPICH2\bin\mpiexec" -n 4 ..\vc\Release\std_feature . g1_5.X feature 20 g1_5.y
 "C:\Program Files (x86)\MPICH2\bin\mpiexec" -n 4 ..\vc\Release\cor_feature . g1_5.X feature 20 g1_5.y
 REM "C:\Program Files (x86)\MPICH2\bin\mpiexec" -n 4 ..\vc\Release\sax_feature . g1_5.X feature 20 g1_5.y 2
-"C:\Program Files (x86)\MPICH2\bin\mpiexec" -n 4 ..\vc\Release\mRMR_feature . g1_5.X feature 20 g1_5.y 1
+"C:\Program Files (x86)\MPICH2\bin\mpiexec" -n 4 ..\vc\Release\mrmr_feature . g1_5.X feature 20 g1_5.y 1
+"C:\Program Files (x86)\MPICH2\bin\mpiexec" -n 4 ..\vc\Release\feature_understanding . g1_5.X feature 20 g1_5.y min max mean std cor
 
 ..\vc\Release\split_by_row . g1_5.X train 24 g1_5.y
 ..\vc\Release\split_by_row . g1_5.y train 24 g1_5.y

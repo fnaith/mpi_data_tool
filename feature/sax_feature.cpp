@@ -31,7 +31,8 @@ static const Number cut_points[][4] = {{0.0},
                                        {-0.84, -0.25, 0.25, 0.84}};
 
 void map_to_sax(vector<Number> *vec, Integer alphabet_size) {
-  for (vector<Number>::iterator it(vec->begin()); it != vec->end(); ++it) {
+  for (vector<Number>::iterator it(vec->begin());
+       it != vec->end(); ++it) {
     Number tmp(*it);
     *it = 0;
     for (Integer j(alphabet_size - 2); j >= 0; --j) {
@@ -71,14 +72,18 @@ void sax_feature(const string& feature_file,
       map_to_sax(tmp, alphabet_size);
 
       vector<Integer> counter(alphabet_size, 0);
-      for (vector<Number>::const_iterator it(tmp->begin()); it != tmp->end(); ++it) {
+      for (vector<Number>::const_iterator it(tmp->begin());
+           it != tmp->end(); ++it) {
         counter[static_cast<Integer>(*it)] += 1;
       }
 
       ostringstream output;
-      Integer max_idx(static_cast<Integer>(distance(counter.begin(), max_element(counter.begin(), counter.end()))));
+      Integer max_idx(static_cast<Integer>(distance(counter.begin(),
+                                                    max_element(counter.begin(),
+                                                                counter.end()))));
       Integer j(0);
-      for (vector<Number>::const_iterator it(tmp->begin()); it != tmp->end(); ++it, ++j) {
+      for (vector<Number>::const_iterator it(tmp->begin());
+           it != tmp->end(); ++it, ++j) {
         if (static_cast<Integer>(*it) != max_idx) {
           if (static_cast<Integer>(*it) == 0) {
             output << (j + 1) << ':' << max_idx << ' ';

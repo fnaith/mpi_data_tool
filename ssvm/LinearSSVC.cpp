@@ -40,7 +40,7 @@ LinearSSVC::LinearSSVC(const Integer negative_number,
     SSVC::make_constraint(negative_number, A);
     W_.resize(A->cols());
     W_.setConstant(0.0);
-    SSVC::train(*A, C_, &W_, &iter_);
+    SSVC::train(*A, negative_number, C_, &W_, &iter_);
     time_ = (Number)(clock() - start) / CLOCKS_PER_SEC;
   } catch (const exception& e) {
     string message;
@@ -79,7 +79,7 @@ LinearSSVC::LinearSSVC(const Integer negative_number,
     SSVC::make_constraint(negative_number, A);
     W_.resize(A->cols());
     W_.setConstant(0.0);
-    SSVC::train(*A, C_, &W_, &iter_);
+    SSVC::train(*A, negative_number, C_, &W_, &iter_);
     time_ = (Number)(clock() - start) / CLOCKS_PER_SEC;
   } catch (const exception& e) {
     string message;
@@ -120,7 +120,7 @@ LinearSSVC::LinearSSVC(const Integer negative_number,
     A->bottomRows(negative_number) *= -1.0;
     W_.resize(A->cols());
     W_.setConstant(0.0);
-    SSVC::train_with_memory(*A, C_, &W_, &iter_, support_vector);
+    SSVC::train_with_memory(*A, negative_number, C_, &W_, &iter_, support_vector);
     time_ = (Number)(clock() - start) / CLOCKS_PER_SEC;
   } catch (const exception& e) {
     string message;
@@ -204,15 +204,15 @@ const Vector& LinearSSVC::W() const {
   return W_;
 }
 
-Number LinearSSVC::C() const {
+const Number LinearSSVC::C() const {
   return C_;
 }
 
-Integer LinearSSVC::iter() const {
+const Integer LinearSSVC::iter() const {
   return iter_;
 }
 
-Number LinearSSVC::time() const {
+const Number LinearSSVC::time() const {
   return time_;
 }
 

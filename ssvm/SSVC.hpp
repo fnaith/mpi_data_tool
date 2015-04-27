@@ -12,6 +12,7 @@ class SSVC {
   static void make_constraint(const Integer negative_number,
                               SparseMatrix *A);
   static void train(const SparseMatrix& A,
+                    const Integer negative_number,
                     const Number C,
                     Vector *w0,
                     Integer *counter);
@@ -22,10 +23,12 @@ class SSVC {
   static void make_constraint(const Integer negative_number,
                               Matrix *A);
   static void train(const Matrix& A,
+                    const Integer negative_number,
                     const Number C,
                     Vector *w0,
                     Integer *counter);
   static void train_with_memory(const Matrix& A,
+                                const Integer negative_number,
                                 const Number C,
                                 Vector *w0,
                                 Integer *counter,
@@ -34,9 +37,9 @@ class SSVC {
                       const Matrix& A,
                       Vector *y);
  private:
-  static Number objf_(const Matrix& A,
-                      const Vector& w,
-                      const Number C);
+  static Number SSVC::objf_(const Matrix& A,
+                            const Vector& w,
+                            const Number C);
   static Number armijo_(const Matrix& A,
                         const Vector& w,
                         const Number C,
